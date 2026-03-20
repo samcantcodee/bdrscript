@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GridOps Cold Call Script — Sherwin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#0040C1;--blue-l:#EEF4FF;--blue-t:#0035A8;
+  --green:#065F46;--green-l:#ECFDF5;--green-b:#6EE7B7;
+  --amber:#92400E;--amber-l:#FFFBEB;--amber-b:#FCD34D;
+  --red:#991B1B;--red-l:#FEF2F2;--red-b:#FCA5A5;
+  --bg:#F8F9FC;--border:#E2E8F0;--text:#0F172A;--muted:#64748B;--white:#FFFFFF;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+.header{background:var(--blue);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.logo{width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:white;}
+.header-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:white;}
+.header-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-top:1px;}
+.header-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:100px;padding:5px 13px;font-size:12px;font-weight:500;color:white;}
+
+.layout{display:flex;max-width:960px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+
+/* SIDEBAR NAV */
+.sidebar{width:200px;flex-shrink:0;}
+.sidebar-inner{position:sticky;top:80px;}
+.nav-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);margin-bottom:10px;padding-left:4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;margin-bottom:3px;border:1px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--white);border-color:var(--border);}
+.nav-item.active{background:var(--white);border-color:var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.nav-text{font-size:13px;font-weight:500;color:var(--text);}
+.nav-num{font-size:10px;color:var(--muted);margin-left:auto;}
+
+.nav-divider{height:1px;background:var(--border);margin:10px 4px;}
+
+.nav-item.blue .nav-dot{background:var(--blue);}
+.nav-item.amber .nav-dot{background:#D97706;}
+.nav-item.green .nav-dot{background:#059669;}
+.nav-item.red .nav-dot{background:#DC2626;}
+.nav-item.gray .nav-dot{background:var(--muted);}
+
+/* MAIN CONTENT */
+.main{flex:1;min-width:0;}
+
+.step-block{margin-bottom:18px;scroll-margin-top:88px;}
+
+.step-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:9px;}
+.tag-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.tag-blue{background:var(--blue-l);color:var(--blue-t);}
+.tag-blue .tag-dot{background:var(--blue);}
+.tag-amber{background:var(--amber-l);color:var(--amber);}
+.tag-amber .tag-dot{background:#D97706;}
+.tag-green{background:var(--green-l);color:var(--green);}
+.tag-green .tag-dot{background:#059669;}
+.tag-red{background:var(--red-l);color:var(--red);}
+.tag-red .tag-dot{background:#DC2626;}
+.tag-gray{background:#F1F5F9;color:var(--muted);}
+.tag-gray .tag-dot{background:var(--muted);}
+
+.step-num-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px;letter-spacing:0.05em;}
+
+.script-card{background:var(--white);border-radius:16px;border:1px solid var(--border);overflow:hidden;}
+.script-line{padding:14px 20px;border-bottom:1px solid var(--border);line-height:1.0;}
+.script-line:last-child{border-bottom:none;}
+.say{font-size:15px;color:var(--text);line-height:1.75;display:block;}
+.note{display:block;font-size:12px;color:var(--muted);font-style:italic;margin-top:5px;}
+.highlight{background:var(--blue-l);color:var(--blue-t);font-weight:500;border-radius:4px;padding:1px 6px;font-style:normal;}
+.pause{display:inline-flex;align-items:center;gap:4px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:100px;padding:2px 9px;font-size:11px;font-weight:500;color:#C2410C;margin-top:6px;}
+
+.paths-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:600px){.paths-grid{grid-template-columns:1fr;}.layout{flex-direction:column;}.sidebar{width:100%;}.sidebar-inner{position:static;}.sidebar-inner{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}.nav-label{width:100%;}.nav-item{flex:0 0 auto;}}
+
+.path-card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:16px 18px;}
+.path-card.yes{border-color:var(--green-b);}
+.path-card.no{border-color:var(--red-b);}
+.path-card.maybe{border-color:var(--amber-b);}
+.path-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.path-icon{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700;}
+.path-card.yes .path-label{color:var(--green);}
+.path-card.yes .path-icon{background:var(--green-l);color:var(--green);}
+.path-card.no .path-label{color:var(--red);}
+.path-card.no .path-icon{background:var(--red-l);color:var(--red);}
+.path-card.maybe .path-label{color:var(--amber);}
+.path-card.maybe .path-icon{background:var(--amber-l);color:var(--amber);}
+.path-card p{font-size:14px;color:var(--text);line-height:1.7;}
+.path-card .sub-note{font-size:12px;color:var(--muted);font-style:italic;margin-top:6px;}
+
+.close-card{background:var(--green-l);border-radius:16px;border:1px solid var(--green-b);overflow:hidden;}
+.close-line{padding:14px 20px;border-bottom:1px solid rgba(110,231,183,0.35);font-size:15px;color:var(--green);line-height:1.75;font-weight:500;}
+.close-line:last-child{border-bottom:none;}
+
+.booking-link-box{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--green-b);border-radius:12px;padding:13px 16px;margin-top:12px;}
+.booking-link-icon{width:34px;height:34px;background:var(--green-l);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--green);font-weight:700;}
+.booking-link-text{flex:1;min-width:0;}
+.booking-link-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:2px;}
+.booking-link-url{font-size:12px;color:var(--blue-t);font-weight:500;word-break:break-all;}
+.copy-btn{background:var(--blue);color:white;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:background 0.2s;}
+.copy-btn:hover{background:var(--blue-t);}
+.copy-btn.copied{background:#059669;}
+
+.section-divider{display:flex;align-items:center;gap:12px;margin:24px 0 18px;}
+.sdl{flex:1;height:1px;background:var(--border);}
+.sdt{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;}
+
+.tip-box{background:#EFF6FF;border-left:3px solid var(--blue);border-radius:0 12px 12px 0;padding:14px 18px;margin-top:16px;font-size:14px;color:var(--blue-t);line-height:1.7;}
+.tip-box strong{font-weight:500;display:block;margin-bottom:4px;}
+
+/* Quick jump pills on mobile at top */
+.quick-nav{display:none;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+@media(max-width:600px){.quick-nav{display:flex;}}
+.qpill{font-size:12px;font-weight:500;padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--white);color:var(--text);cursor:pointer;text-decoration:none;}
+.qpill.blue{border-color:#93C5FD;background:var(--blue-l);color:var(--blue-t);}
+.qpill.amber{border-color:var(--amber-b);background:var(--amber-l);color:var(--amber);}
+.qpill.green{border-color:var(--green-b);background:var(--green-l);color:var(--green);}
+.qpill.red{border-color:var(--red-b);background:var(--red-l);color:var(--red);}
+
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);background:var(--white);margin-top:20px;}
+.footer a{color:var(--blue-t);text-decoration:none;font-weight:500;}
+
+/* Floating back-to-top */
+.back-top{position:fixed;bottom:24px;right:24px;width:40px;height:40px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;cursor:pointer;opacity:0;transition:opacity 0.3s;z-index:50;border:none;box-shadow:0 2px 8px rgba(0,64,193,0.3);}
+.back-top.show{opacity:1;}
+.back-top:hover{background:var(--blue-t);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">G</div>
+    <div>
+      <div class="header-title">Cold call script</div>
+      <div class="header-sub">Sherwin — GridOps BDR</div>
+    </div>
+  </div>
+  <div class="header-badge">gridops.ca</div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-inner">
+      <div class="nav-label">Jump to step</div>
+
+      <a href="#step1" class="nav-item blue" data-section="step1">
+        <span class="nav-dot"></span>
+        <span class="nav-text">Open</span>
+        <span class="nav-num">1</span>
+      </a>
+      <a href="#step2" class="nav-item blue" data-section="step2">
+        <span class="nav-dot"></span>
+        <span class="nav-text">Butter up</span>
+        <span class="nav-num">2</span>
+      </a>
+      <a href="#step3" class="nav-item amber" data-section="step3">
+        <span class="nav-dot"></span>
+        <span class="nav-text">The pivot</span>
+        <span class="nav-num">3</span>
+      </a>
+      <a href="#step4" class="nav-item amber" data-section="step4">
+        <span class="nav-dot"></span>
+        <span class="nav-text">The question</span>
+        <span class="nav-num">4</span>
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Responses</div>
+
+      <a href="#paths" class="nav-item gray" data-section="paths">
+        <span class="nav-dot"></span>
+        <span class="nav-text">All paths</span>
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Close</div>
+
+      <a href="#step5" class="nav-item green" data-section="step5">
+        <span class="nav-dot"></span>
+        <span class="nav-text">Book demo</span>
+        <span class="nav-num">5</span>
+      </a>
+      <a href="#hesitate" class="nav-item red" data-section="hesitate">
+        <span class="nav-dot"></span>
+        <span class="nav-text">They hesitate</span>
+      </a>
+      <a href="#voicemail" class="nav-item gray" data-section="voicemail">
+        <span class="nav-dot"></span>
+        <span class="nav-text">Voicemail</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Mobile quick nav -->
+    <div class="quick-nav">
+      <a href="#step1" class="qpill blue">1. Open</a>
+      <a href="#step2" class="qpill blue">2. Butter up</a>
+      <a href="#step3" class="qpill amber">3. Pivot</a>
+      <a href="#step4" class="qpill amber">4. Question</a>
+      <a href="#paths" class="qpill">Responses</a>
+      <a href="#step5" class="qpill green">5. Book demo</a>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step-block" id="step1">
+      <div class="step-num-label">Step 1</div>
+      <div class="step-tag tag-blue"><span class="tag-dot"></span>Open</div>
+      <div class="script-card">
+        <div class="script-line">
+          <span class="say">"Hi, is this <span class="highlight">[company name]</span>?"</span>
+          <span class="note">Wait for yes. Then say:</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"Can I speak with the owner please?"</span>
+          <span class="note">If they ask why, say:</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"I was looking at their reviews online. I have a quick question for them."</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-block" id="step2">
+      <div class="step-num-label">Step 2</div>
+      <div class="step-tag tag-blue"><span class="tag-dot"></span>Butter them up</div>
+      <div class="script-card">
+        <div class="script-line">
+          <span class="say">"Hi <span class="highlight">[name]</span>, my name is Sherwin. I am calling from GridOps. I was on your Google reviews before calling you."</span>
+          <span class="note">Pause 1 second. Then:</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"Your clients are saying really great things about your service."</span>
+          <span class="pause">⏸ Pause</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"They talk about how professional your drivers are. How clean your vehicles are. How on time you always are."</span>
+          <span class="pause">⏸ Pause</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"And <span class="highlight">[John]</span> is getting mentioned by name in a few reviews. That does not happen often. That is a really big deal."</span>
+          <span class="note">Pause. Let them react. Wait for them to say thank you.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-block" id="step3">
+      <div class="step-num-label">Step 3</div>
+      <div class="step-tag tag-amber"><span class="tag-dot"></span>The pivot</div>
+      <div class="script-card">
+        <div class="script-line">
+          <span class="say">"The only thing that keeps coming up in the negative reviews has nothing to do with your service."</span>
+          <span class="pause">⏸ Pause</span>
+        </div>
+        <div class="script-line">
+          <span class="say">"It is always about the booking experience."</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-block" id="step4">
+      <div class="step-num-label">Step 4</div>
+      <div class="step-tag tag-amber"><span class="tag-dot"></span>Hard hitting question</div>
+      <div class="script-card">
+        <div class="script-line">
+          <span class="say">"Have you ever thought about digitalizing your booking?"</span>
+          <span class="note">Stop talking completely. Wait for them to answer. This silence is where the sale starts.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider" id="paths">
+      <div class="sdl"></div>
+      <div class="sdt">What happens next</div>
+      <div class="sdl"></div>
+    </div>
+
+    <!-- PATHS -->
+    <div class="paths-grid">
+      <div class="path-card yes">
+        <div class="path-label"><span class="path-icon">+</span>They say yes</div>
+        <p>"That is exactly what we do. We give you instant online booking so your clients can book you in 60 seconds. No forms. No waiting. Would you be open to a 20 minute call with our founder to see how it works for your business?"</p>
+      </div>
+      <div class="path-card no">
+        <div class="path-label"><span class="path-icon">–</span>Not interested</div>
+        <p>"I hear you. Most operators I talk to say the same thing at first. Can I at least send you one quick email? No pressure at all."</p>
+      </div>
+    </div>
+
+    <div class="paths-grid">
+      <div class="path-card maybe">
+        <div class="path-label"><span class="path-icon">?</span>Pushes back on reviews</div>
+        <p>"Totally fair. Your service clearly speaks for itself. The booking piece is just what your own clients are bringing up. That is the only reason I called."</p>
+      </div>
+      <div class="path-card maybe">
+        <div class="path-label"><span class="path-icon">?</span>Send me info first</div>
+        <p>"Of course. Before I do, would it be worth a quick 20 minute call with our founder so he can show you something specific to your setup? Much better than an email."</p>
+      </div>
+    </div>
+
+    <div class="paths-grid">
+      <div class="path-card no">
+        <div class="path-label"><span class="path-icon">–</span>Owner not available</div>
+        <p>"No problem. What is the best time to reach them? I will call back then."</p>
+        <p class="sub-note">Do NOT leave a message with staff. Call back at the exact time they give you.</p>
+      </div>
+      <div class="path-card no" id="voicemail">
+        <div class="path-label"><span class="path-icon">–</span>Goes to voicemail</div>
+        <p>"Hi <span class="highlight">[name]</span>, Sherwin from GridOps. I was on your Google reviews. Your clients love you. Quick question about your booking. Call me back at <span class="highlight">[your number]</span> or book a time at gridops.ca"</p>
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <div class="sdl"></div>
+      <div class="sdt">Close the demo</div>
+      <div class="sdl"></div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-block" id="step5">
+      <div class="step-num-label">Step 5</div>
+      <div class="step-tag tag-green"><span class="tag-dot"></span>Book the demo</div>
+      <div class="close-card">
+        <div class="close-line">"Perfect. Let me send you a calendar link right now while I have you on the phone."</div>
+        <div class="close-line">"It is a 20 minute call with Sam, our founder. He will show you exactly what it looks like for a company like yours."</div>
+        <div class="close-line">"Did you get it? Great. You are all booked in. Sam will see you then."</div>
+      </div>
+      <div class="booking-link-box">
+        <div class="booking-link-icon">&#128279;</div>
+        <div class="booking-link-text">
+          <div class="booking-link-label">Sam's booking link — send this</div>
+          <div class="booking-link-url">meetings-na3.hubspot.com/sam-rost/discovery-call</div>
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy</button>
+      </div>
+    </div>
+
+    <!-- HESITATE -->
+    <div class="step-block" id="hesitate">
+      <div class="step-tag tag-red"><span class="tag-dot"></span>If they hesitate on booking</div>
+      <div class="script-card">
+        <div class="script-line">
+          <span class="say">"No pressure at all. Even just 20 minutes. Sam is going to show you something specific to your reviews and your business. Not a generic demo. If it is not relevant you can end the call early."</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>Two things to remember on every call</strong>
+      The pause after "it is always about the booking experience" is the most important moment. Hold the silence even if it feels uncomfortable. The owner will fill it.<br/><br/>
+      Always send the booking link while they are still on the phone. Never say "I will email it to you." Send it live and confirm they received it. That is the difference between a booked meeting and a maybe.
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  GridOps — <a href="https://gridops.ca" target="_blank">gridops.ca</a> &nbsp;|&nbsp; For internal use only
+</div>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+function copyLink() {
+  navigator.clipboard.writeText('https://meetings-na3.hubspot.com/sam-rost/discovery-call').then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('backTop').classList.toggle('show', window.scrollY > 300);
+});
+
+const sections = ['step1','step2','step3','step4','paths','step5','hesitate','voicemail'];
+const navItems = document.querySelectorAll('.nav-item[data-section]');
+
+function setActive(id) {
+  navItems.forEach(n => {
+    n.classList.toggle('active', n.dataset.section === id);
+  });
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) setActive(e.target.id);
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+</script>
+</body>
+</html>
